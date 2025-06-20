@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from langchain_community.llms import OpenAI
+from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
@@ -9,21 +9,32 @@ load_dotenv()
 
 app = FastAPI()
 
-# CORS for frontend access
+# CORS setup so frontend can connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Change to your Vercel domain later
+    allow_origins=["*"],  # Replace with your frontend URL for production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-llm = OpenAI(openai_api_key=os.getenv("OPENAI_API_KEY"))
+# OpenRouter setup using the new OpenAI client
+client = OpenAI(
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+    base_url="https://openrouter.ai/api/v1"
+)
 
 class Prompt(BaseModel):
     prompt: str
 
 @app.post("/generate")
 def generate_tweet(data: Prompt):
-    tweet = llm(f"Write a tweet about: {data.prompt}")
-    return {"result": tweet.strip()} 
+    try:
+        response = client.chat.completions.create(
+            model="openai/gpt-3.5-turbo",  # Or try "mistralai/mixtral-8x7b" etc.
+            messages=[{"role": "user", "content": f"Write a tweet about: {data.prompt}"}]
+        )
+        tweet = response.choices[0].message.content
+        return {"result": tweet.strip()}
+    except Exception as e:
+        return {"error": str(e)}

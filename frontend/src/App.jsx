@@ -30,13 +30,36 @@ export default function App() {
     }
   });
 
-  const generateTweet = () => {
-    if (!prompt()) return;
-    const fake = `Here's a tweet about: ${prompt()}`;
-    setTweet(fake);
-    setHistory([{ text: fake, topic: prompt(), posted: false }, ...history()]);
+  const generateTweet = async () => {
+  if (!prompt()) return;
+
+  try {
+    const response = await fetch("http://127.0.0.1:8000/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: prompt() }),
+
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to generate tweet");
+    }
+
+    const data = await response.json();
+    const tweetText = data.result;
+
+
+    setTweet(tweetText);
+    setHistory([{ text: tweetText, topic: prompt(), posted: false }, ...history()]);
     setPrompt("");
-  };
+  } catch (error) {
+    console.error("Error generating tweet:", error);
+    alert("Something went wrong while generating the tweet.");
+  }
+};
+
 
   const postTweet = (index) => {
     const updated = history().map((item, i) =>
