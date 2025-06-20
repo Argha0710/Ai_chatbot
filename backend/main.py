@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from langchain.llms import OpenAI
+from langchain_community.llms import OpenAI
 import os
 from dotenv import load_dotenv
 
@@ -9,10 +9,10 @@ load_dotenv()
 
 app = FastAPI()
 
-# Allow requests from frontend (localhost or Vercel)
+# CORS for frontend access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with your Vercel domain for production
+    allow_origins=["*"],  # Change to your Vercel domain later
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,4 +26,4 @@ class Prompt(BaseModel):
 @app.post("/generate")
 def generate_tweet(data: Prompt):
     tweet = llm(f"Write a tweet about: {data.prompt}")
-    return {"tweet": tweet.strip()}
+    return {"result": tweet.strip()} 
