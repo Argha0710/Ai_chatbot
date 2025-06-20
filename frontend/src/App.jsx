@@ -68,7 +68,7 @@ export default function App() {
           <button
            class="mt-4 w-full bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition py-2 px-4 rounded-lg"
             onClick={generateTweet}
-          >  ✨
+          >  
              Generate Tweet
           </button>
         </div>
