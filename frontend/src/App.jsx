@@ -34,14 +34,16 @@ export default function App() {
   if (!prompt()) return;
 
   try {
-    const response = await fetch("https://ai-chatbot-fcif.onrender.com/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: prompt() }),
+   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-    });
+const response = await fetch(`${BACKEND_URL}/generate`, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ prompt: prompt() }),
+});
+
 
     if (!response.ok) {
       throw new Error("Failed to generate tweet");
