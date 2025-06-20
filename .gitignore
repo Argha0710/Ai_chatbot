@@ -26,3 +26,14 @@ gitignore
 # System Files
 .DS_Store
 Thumbs.db
+# Python
+__pycache__/
+*.py[cod]
+
+# Vite/Frontend extra safety
+frontend/dist/
+frontend/.vite/
+frontend/.output/
+
+# Backend-specific (if needed)
+backend/__pycache__/
