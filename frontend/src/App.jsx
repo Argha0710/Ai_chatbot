@@ -38,7 +38,7 @@ export default function App() {
 
       <div class="max-w-3xl mx-auto px-4 py-8">
         <h1 class="text-4xl font-bold text-center mb-6">
-          🤖 <span class="text-indigo-600 dark:text-indigo-400">AI Tweet Generator</span>
+           <span class="text-indigo-600 dark:text-indigo-400">Tweet Ai</span>
         </h1>
         <div class="flex justify-end mb-4">
           <button
@@ -68,8 +68,8 @@ export default function App() {
           <button
            class="mt-4 w-full bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition py-2 px-4 rounded-lg"
             onClick={generateTweet}
-          >
-            ✨ Generate Tweet
+          >  ✨
+             Generate Tweet
           </button>
         </div>
 
