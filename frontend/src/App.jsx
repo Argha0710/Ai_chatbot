@@ -150,7 +150,7 @@ const generateTweet = async () => {
               AI Tweet Studio
             </span>
           </h1>
-          <button
+          {/* <button
             aria-label="Toggle dark mode"
             class="transition-colors duration-300 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-full p-2 shadow hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none"
             onClick={() => {
@@ -160,7 +160,7 @@ const generateTweet = async () => {
             }}
           >
             <span class="text-xl">{darkMode() ? "🌙" : "☀️"}</span>
-          </button>
+          </button> */}
         </header>
 
         <main>

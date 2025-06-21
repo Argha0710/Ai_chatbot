@@ -15,6 +15,11 @@
     font-family: 'Inter', sans-serif;
   }
 </style>
+<script>
+  if (localStorage.getItem("theme") === "dark") {
+    document.documentElement.classList.add("dark");
+  }
+</script>
 </head>
 
 <body>
@@ -25,8 +30,4 @@
 </body>
 
 </html>
-<script>
-  if (localStorage.getItem("theme") === "dark") {
-    document.documentElement.classList.add("dark");
-  }
-</script>
+
