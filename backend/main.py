@@ -12,7 +12,9 @@ app = FastAPI()
 # CORS setup so frontend can connect
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Replace with your frontend URL for production
+    allow_origins=["https://ai-chatbot-vert-six-94.vercel.app",  # ✅ Your frontend URL
+        "http://localhost:3000",                      # ✅ For local dev
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,7 +33,7 @@ class Prompt(BaseModel):
 def generate_tweet(data: Prompt):
     try:
         response = client.chat.completions.create(
-            model="openai/gpt-3.5-turbo",  # Or try "mistralai/mixtral-8x7b" etc.
+            model="openai/gpt-3.5-turbo",  
             messages=[{"role": "user", "content": f"Write a tweet about: {data.prompt}"}]
         )
         tweet = response.choices[0].message.content
