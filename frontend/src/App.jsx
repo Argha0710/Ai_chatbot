@@ -63,12 +63,38 @@ const response = await fetch(`${BACKEND_URL}/generate`, {
 };
 
 
-  const postTweet = (index) => {
+  const postTweet = async (index) => {
+  const tweetToPost = history()[index];
+  // console.log("🧪 Using API Key:", import.meta.env.VITE_TWITTER_CLONE_API_KEY);
+
+
+  try {
+    const response = await fetch("https://twitterclone-server-2xz2.onrender.com/post_tweet", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": import.meta.env.VITE_TWITTER_CLONE_API_KEY,
+      },
+      body: JSON.stringify({
+        content: tweetToPost.text,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to post tweet");
+    }
+
+    // Mark tweet as posted ✅
     const updated = history().map((item, i) =>
       i === index ? { ...item, posted: true } : item
     );
     setHistory(updated);
-  };
+  } catch (error) {
+    console.error("Error posting tweet:", error);
+    alert("Tweet post failed");
+  }
+};
+
 
   return (
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-gray-800 transition-colors duration-500">
