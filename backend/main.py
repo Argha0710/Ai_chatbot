@@ -65,8 +65,10 @@ def proxy_post_tweet(tweet: Tweet, api_key: str = Header(...)):
         )
 
         if not response.ok:
+            print("🔴 TwitterClone server response:", response.text)  # <-- log actual error
             raise HTTPException(status_code=500, detail="Failed to post tweet to TwitterClone")
 
         return {"status": "Tweet posted via proxy"}
     except Exception as e:
+        print("🚨 Internal error posting tweet:", str(e))  # <-- log Python-side error
         raise HTTPException(status_code=500, detail=str(e))
