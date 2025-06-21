@@ -110,18 +110,17 @@ const generateTweet = async () => {
 
   const postTweet = async (index) => {
   const tweetToPost = history()[index];
-  // console.log("🧪 Using API Key:", import.meta.env.VITE_TWITTER_CLONE_API_KEY);
-
 
   try {
-    const response = await fetch("https://twitterclone-server-2xz2.onrender.com/post_tweet", {
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/post_tweet`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "api-key": import.meta.env.VITE_TWITTER_CLONE_API_KEY,
       },
       body: JSON.stringify({
-        content: tweetToPost.text,
+        username: "argha",               // ✅ required now
+        text: tweetToPost.text,         // ✅ the actual tweet text
       }),
     });
 
@@ -136,9 +135,10 @@ const generateTweet = async () => {
     setHistory(updated);
   } catch (error) {
     console.error("Error posting tweet:", error);
-    alert("Tweet post failed");
+    alert("Tweet post failed: " + error.message);
   }
 };
+
 
 
   return (
