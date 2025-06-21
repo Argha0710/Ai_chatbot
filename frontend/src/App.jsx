@@ -6,6 +6,8 @@ export default function App() {
   const [prompt, setPrompt] = createSignal("");
   const [tweet, setTweet] = createSignal("");
   const [history, setHistory] = createSignal([]);
+  const [loading, setLoading] = createSignal(false);
+  // 🆕 Dark mode state
   const [darkMode, setDarkMode] = createSignal(false);
 
   onMount(() => {
@@ -30,20 +32,21 @@ export default function App() {
     }
   });
 
-  const generateTweet = async () => {
+// 🆕 Function to generate tweet (no auto-posting)
+const generateTweet = async () => {
   if (!prompt()) return;
+  setLoading(true); // 🧠 Start thinking
 
   try {
-   const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
-const response = await fetch(`${BACKEND_URL}/generate`, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({ prompt: prompt() }),
-});
-
+    const response = await fetch(`${BACKEND_URL}/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ prompt: prompt() }),
+    });
 
     if (!response.ok) {
       throw new Error("Failed to generate tweet");
@@ -52,15 +55,57 @@ const response = await fetch(`${BACKEND_URL}/generate`, {
     const data = await response.json();
     const tweetText = data.result;
 
-
     setTweet(tweetText);
     setHistory([{ text: tweetText, topic: prompt(), posted: false }, ...history()]);
     setPrompt("");
   } catch (error) {
     console.error("Error generating tweet:", error);
     alert("Something went wrong while generating the tweet.");
+  } finally {
+    setLoading(false); // ✅ Stop thinking
   }
 };
+
+
+// const generateTweet = async () => {
+//   if (!prompt()) return;
+//   setLoading(true); // 🧠 Start thinking
+
+//   try {
+//     const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
+
+//     const response = await fetch(`${BACKEND_URL}/generate`, {
+//       method: "POST",
+//       headers: { "Content-Type": "application/json" },
+//       body: JSON.stringify({ prompt: prompt() }),
+//     });
+
+//     if (!response.ok) throw new Error("Failed to generate tweet");
+
+//     const data = await response.json();
+//     const tweetText = data.result;
+
+//     const postResponse = await fetch("https://twitterclone-server-2xz2.onrender.com/post_tweet", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//         "api-key": import.meta.env.VITE_TWITTER_CLONE_API_KEY,
+//       },
+//       body: JSON.stringify({ text: tweetText }),
+//     });
+
+//     if (!postResponse.ok) throw new Error("Tweet generated but failed to post.");
+
+//     setTweet(tweetText);
+//     setHistory([{ text: tweetText, topic: prompt(), posted: true }, ...history()]);
+//     setPrompt("");
+
+//   } catch (error) {
+//     alert("Something went wrong: " + error.message);
+//   } finally {
+//     setLoading(false); // ✅ Stop thinking
+//   }
+// };
 
 
   const postTweet = async (index) => {
@@ -137,11 +182,23 @@ const response = await fetch(`${BACKEND_URL}/generate`, {
               aria-label="Tweet topic"
             />
             <button
-              class="mt-4 w-full bg-indigo-600 dark:bg-indigo-500 text-white font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition py-2 px-4 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-400"
-              onClick={generateTweet}
-            >
-              Generate Tweet
-            </button>
+  class="mt-4 w-full bg-indigo-600 dark:bg-indigo-500 text-white font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition py-2 px-4 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:opacity-50"
+  onClick={generateTweet}
+  disabled={loading()}
+>
+  {loading() ? (
+  <div class="flex justify-center gap-1 items-center">
+    <span>Thinking</span>
+    <div class="animate-pulse w-1 h-1 bg-white rounded-full"></div>
+    <div class="animate-pulse w-1 h-1 bg-white rounded-full delay-75"></div>
+    <div class="animate-pulse w-1 h-1 bg-white rounded-full delay-150"></div>
+  </div>
+) : (
+  "Generate Tweet"
+)}
+
+</button>
+
           </section>
 
           {tweet() && (
