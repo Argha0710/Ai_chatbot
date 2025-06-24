@@ -56,7 +56,7 @@ def generate_tweet(data: Prompt):
         else:
             final_prompt += " Do not include any emojis."
 
-        # print(f"📩 Final prompt to OpenAI: {final_prompt}")
+        print(f"📩 Final prompt to OpenAI: {final_prompt}")
 
         response = client.chat.completions.create(
             model="openai/gpt-3.5-turbo",

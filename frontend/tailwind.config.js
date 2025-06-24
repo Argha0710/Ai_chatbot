@@ -2,11 +2,22 @@
 export default {
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  theme: {
-    extend: {},
-  },
   darkMode: "class",
+  theme: {
+    extend: {
+      fontFamily: {
+        inter: ['Inter', 'sans-serif'],
+      },
+      boxShadow: {
+        smooth: '0 4px 12px rgba(0, 0, 0, 0.06)',
+      },
+      borderRadius: {
+        xl: '1.25rem',
+        '2xl': '1.5rem',
+      },
+    },
+  },
   plugins: [],
 };
