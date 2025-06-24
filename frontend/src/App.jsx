@@ -48,7 +48,7 @@ export default function App() {
   };
 
   return (
-    <div class="min-h-screen transition-all duration-300 transition-colors duration-500 ease-in-out
+    <div class="min-h-screen transition-colors duration-500 ease-in-out
       bg-white text-black 
       dark:bg-gray-900 dark:text-white">
 
