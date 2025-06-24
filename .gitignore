@@ -1,21 +1,31 @@
-dist
-.wrangler
-.output
-.vercel
-.netlify
-.vinxi
-app.config.timestamp_*.js
+# Node.js / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/.output/
+frontend/.env
+frontend/.env*.local
 
-# Environment
+# Python / Backend
+backend/node_modules/
+backend/__pycache__/
+backend/.env
+backend/.env*.local
+
+# General
 .env
 .env*.local
-
-# dependencies
-frontend/node_modules/
-backend/node_modules/
+*.log
+*.lock
+.DS_Store
+Thumbs.db
 
 # IDEs and editors
 /.idea
+.vscode/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
 .project
 .classpath
 *.launch
@@ -24,14 +34,13 @@ backend/node_modules/
 # System Files
 .DS_Store
 Thumbs.db
-# Python
-__pycache__/
-*.py[cod]
 
-# Vite/Frontend extra safety
-frontend/dist/
-frontend/.vite/
-frontend/.output/
+# Vercel/Netlify/Deploy
+.vercel/
+.netlify/
+.output/
+.wrangler/
+app.config.timestamp_*.js
 
-# Backend-specific (if needed)
-backend/__pycache__/
+# Misc
+dist

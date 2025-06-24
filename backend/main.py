@@ -31,23 +31,47 @@ client = OpenAI(
 # Models
 class Prompt(BaseModel):
     prompt: str
+    hashtag: bool = False
+    emoji: bool = False  
 
 class Tweet(BaseModel):
     username: str
     text: str
+    
 
 # Routes
 @app.post("/generate")
 def generate_tweet(data: Prompt):
     try:
+        # Build the prompt based on the two booleans
+        final_prompt = f"Write a tweet about: {data.prompt}."
+
+        if data.hashtag:
+            final_prompt += " Include a relevant hashtag at the end. and also"
+        else:
+            final_prompt += " Do not include any hashtags.  and also"
+
+        if data.emoji:
+            final_prompt += " Include a relevant emoji."
+        else:
+            final_prompt += " Do not include any emojis."
+
+        print(f"📩 Final prompt to OpenAI: {final_prompt}")
+
         response = client.chat.completions.create(
             model="openai/gpt-3.5-turbo",
-            messages=[{"role": "user", "content": f"Write a tweet about: {data.prompt}"}]
+            messages=[{"role": "user", "content": final_prompt}]
         )
+
         tweet = response.choices[0].message.content
+        if tweet is None:
+            raise ValueError("Received empty tweet content from OpenAI")
         return {"result": tweet.strip()}
+
     except Exception as e:
         return {"error": str(e)}
+
+
 
 @app.post("/post_tweet")
 def proxy_post_tweet(tweet: Tweet, api_key: str = Header(...)):
