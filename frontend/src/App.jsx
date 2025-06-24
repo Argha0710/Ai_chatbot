@@ -11,18 +11,18 @@ export default function App() {
   const [editedTweet, setEditedTweet] = createSignal("");
   const [includeHashtag, setIncludeHashtag] = createSignal(false);
   const [includeEmoji, setIncludeEmoji] = createSignal(false);
-  const [darkMode, setDarkMode] = createSignal(false);
+  // const [darkMode, setDarkMode] = createSignal(false);
 
-  onMount(() => {
-    const saved = localStorage.getItem("theme");
-    const isDark = saved === "dark";
-    setDarkMode(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
-  });
+  // onMount(() => {
+  //   const saved = localStorage.getItem("theme");
+  //   const isDark = saved === "dark";
+  //   setDarkMode(isDark);
+  //   document.documentElement.classList.toggle("dark", isDark);
+  // });
 
-  createEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode());
-  });
+  // createEffect(() => {
+  //   document.documentElement.classList.toggle("dark", darkMode());
+  // });
 
   const generateTweet = async () => {
     if (!prompt()) return;
@@ -81,7 +81,7 @@ export default function App() {
               AI Tweet Studio
             </span>
           </h1>
-          <button
+          {/* <button
             class="bg-gray-200 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-full p-2 focus:outline-none shadow hover:bg-gray-300 dark:hover:bg-gray-700"
             onClick={() => {
               const newMode = !darkMode();
@@ -90,7 +90,7 @@ export default function App() {
             }}
           >
             {darkMode() ? "🌙" : "☀️"}
-          </button>
+          </button> */}
         </header>
 
         <section class="bg-gray-100 dark:bg-gray-900 p-6 rounded-2xl shadow-lg border dark:border-gray-700">
