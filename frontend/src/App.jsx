@@ -14,10 +14,10 @@ export default function App() {
   // const [darkMode, setDarkMode] = createSignal(false);
 
   onMount(() => {
-  const saved = localStorage.getItem("theme");
-  const isDark = saved === "dark";
-  setDarkMode(isDark);
-  document.documentElement.classList.toggle("dark", isDark);
+  // const saved = localStorage.getItem("theme");
+  // const isDark = saved === "dark";
+  // setDarkMode(isDark);
+  // document.documentElement.classList.toggle("dark", isDark);
 
   // 🔥 Warm-up API
   fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
@@ -28,9 +28,9 @@ export default function App() {
 });
 
 
-  createEffect(() => {
-    document.documentElement.classList.toggle("dark", darkMode());
-  });
+  // createEffect(() => {
+  //   document.documentElement.classList.toggle("dark", darkMode());
+  // });
 
   const generateTweet = async () => {
     if (!prompt()) return;
