@@ -11,7 +11,7 @@ export default function App() {
   const [editedTweet, setEditedTweet] = createSignal("");
   const [includeHashtag, setIncludeHashtag] = createSignal(false);
   const [includeEmoji, setIncludeEmoji] = createSignal(false);
-  const [darkMode, setDarkMode] = createSignal(false);
+  // const [darkMode, setDarkMode] = createSignal(false);
 
   onMount(() => {
   const saved = localStorage.getItem("theme");
@@ -87,7 +87,7 @@ export default function App() {
           <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-transparent bg-clip-text animate-pulse">
             AI Tweet Studio 🚀
           </h1>
-          <button
+          {/* <button
             class="bg-gradient-to-r from-gray-700 to-gray-800 text-white px-3 py-2 rounded-full shadow-xl hover:shadow-neon focus:outline-none"
             onClick={() => {
               const newMode = !darkMode();
@@ -96,7 +96,7 @@ export default function App() {
             }}
           >
             {darkMode() ? "🌙" : "☀️"}
-          </button>
+          </button> */}
         </header>
 
         <section class="bg-gray-900/70 backdrop-blur-md border border-indigo-500/30 rounded-2xl shadow-2xl p-6 transition-all duration-300">
