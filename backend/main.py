@@ -47,7 +47,7 @@ def generate_tweet(data: Prompt):
         final_prompt += " Include a relevant hashtag at the end." if data.hashtag else " Do not include any hashtags."
         final_prompt += " Include a relevant emoji." if data.emoji else " Do not include any emojis."
 
-        print(f"📩 Final prompt to OpenAI: {final_prompt}")
+        # print(f"📩 Final prompt to OpenAI: {final_prompt}")
 
         # 🧠 Call OpenRouter model
         response = client.chat.completions.create(
