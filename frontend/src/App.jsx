@@ -1,32 +1,35 @@
-import { createSignal, onMount } from "solid-js";
-import "./index.css";
-import "solid-js/web";
+import { createSignal, onMount } from "solid-js"; // SolidJS hooks for reactivity
+import "./index.css"; // TailwindCSS + custom styles
+import "solid-js/web"; // Web-specific bindings
 
+// Main component
 export default function App() {
-  // Signals: manage state across UI
-  const [prompt, setPrompt] = createSignal("");
-  const [tweet, setTweet] = createSignal("");
-  const [history, setHistory] = createSignal([]);
-  const [loading, setLoading] = createSignal(false);
-  const [editing, setEditing] = createSignal(false);
-  const [editedTweet, setEditedTweet] = createSignal("");
-  const [includeHashtag, setIncludeHashtag] = createSignal(false);
-  const [includeEmoji, setIncludeEmoji] = createSignal(false);
+  // 🌟 State variables (SolidJS reactive signals)
+  const [prompt, setPrompt] = createSignal("");              // user input topic
+  const [tweet, setTweet] = createSignal("");                // generated tweet
+  const [history, setHistory] = createSignal([]);            // tweet history
+  const [loading, setLoading] = createSignal(false);         // loading indicator
+  const [editing, setEditing] = createSignal(false);         // editing state toggle
+  const [editedTweet, setEditedTweet] = createSignal("");    // editable tweet content
+  const [includeHashtag, setIncludeHashtag] = createSignal(false); // toggle for hashtag
+  const [includeEmoji, setIncludeEmoji] = createSignal(false);     // toggle for emoji
 
-  // Auto-apply dark mode based on system preference (no toggle)
+  // 🚀 Run once when the app loads
   onMount(() => {
+    // 🌙 Enable dark mode if system prefers it
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", prefersDark);
 
-    // Optional: warm up backend for faster first load
+    // 🔥 Warm-up the backend by making a dummy request
+    // This reduces latency on the first real request
     fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
-    }).catch(() => {});
+    }).catch(() => {}); // Ignore error
   });
 
-  // Generate a tweet via backend
+  // ✨ Generate tweet from backend
   const generateTweet = async () => {
     if (!prompt()) return;
     setLoading(true);
@@ -46,17 +49,18 @@ export default function App() {
       const data = await response.json();
       const tweetText = data.result;
 
+      // Save tweet to state and history
       setTweet(tweetText);
       setHistory([{ text: tweetText, topic: prompt(), posted: false }, ...history()]);
-      setPrompt("");
+      setPrompt(""); // clear input field
     } catch (error) {
       alert("Error generating tweet: " + error.message);
     } finally {
-      setLoading(false);
+      setLoading(false); // stop loading spinner
     }
   };
 
-  // Post the tweet to Twitter Clone backend
+  // 📨 Post tweet to Twitter Clone backend
   const postTweet = async (index) => {
     const tweetToPost = history()[index];
     try {
@@ -71,6 +75,7 @@ export default function App() {
 
       if (!response.ok) throw new Error("Failed to post tweet");
 
+      // Mark tweet as posted in history list
       const updated = history().map((item, i) =>
         i === index ? { ...item, posted: true } : item
       );
@@ -80,17 +85,18 @@ export default function App() {
     }
   };
 
+  // 🖼️ UI Structure
   return (
     <div class="min-h-screen bg-gradient-to-tr from-gray-950 to-gray-900 text-white font-sans">
       <div class="max-w-3xl mx-auto px-6 py-14">
-        {/* App Header */}
+        {/* 🧠 App Title */}
         <header class="flex justify-between items-center mb-10">
           <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-transparent bg-clip-text animate-pulse">
             AI Tweet Studio 🚀
           </h1>
         </header>
 
-        {/* Prompt Input Form */}
+        {/* 📝 Prompt Input Section */}
         <section class="bg-gray-900/70 backdrop-blur-md border border-indigo-500/30 rounded-2xl shadow-2xl p-6">
           <label for="tweet-topic" class="block text-lg font-semibold mb-2 text-indigo-300">
             What should your tweet be about?
@@ -104,7 +110,7 @@ export default function App() {
             onInput={(e) => setPrompt(e.target.value)}
           />
 
-          {/* Hashtag & Emoji Toggles */}
+          {/* ⚙️ Options: Include hashtag and emoji */}
           <div class="flex flex-wrap gap-4 mt-4">
             <label class="flex items-center gap-2 text-sm text-indigo-200">
               <input type="checkbox" checked={includeHashtag()} onChange={(e) => setIncludeHashtag(e.target.checked)} />
@@ -116,7 +122,7 @@ export default function App() {
             </label>
           </div>
 
-          {/* Generate Tweet Button */}
+          {/* ✨ Generate Tweet Button */}
           <button
             class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50"
             onClick={generateTweet}
@@ -126,7 +132,7 @@ export default function App() {
           </button>
         </section>
 
-        {/* Generated Tweet Display */}
+        {/* 📢 Generated Tweet Section */}
         {tweet() && (
           <section class="mt-12 animate-fade-in">
             <h2 class="text-xl font-semibold mb-3 text-indigo-400">Generated Tweet</h2>
@@ -142,7 +148,7 @@ export default function App() {
                 <p class="text-white text-lg">{tweet()}</p>
               )}
 
-              {/* Edit / Copy / Save Controls */}
+              {/* 🛠️ Tweet Controls */}
               <div class="flex justify-end gap-4 mt-4 text-sm">
                 <button onClick={() => navigator.clipboard.writeText(tweet())} class="text-indigo-300 hover:underline">📋 Copy</button>
                 {editing() ? (
@@ -168,7 +174,7 @@ export default function App() {
           </section>
         )}
 
-        {/* History Section */}
+        {/* 🕓 Tweet History Section */}
         {history().length > 0 && (
           <section class="mt-10">
             <h2 class="text-xl font-semibold mb-4 text-indigo-400">Tweet History</h2>
