@@ -1,32 +1,28 @@
-import { createSignal, onMount} from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import "./index.css";
 import "solid-js/web";
 
 export default function App() {
-  const [prompt, setPrompt] = createSignal("");
-  const [tweet, setTweet] = createSignal("");
-  const [history, setHistory] = createSignal([]);
-  const [loading, setLoading] = createSignal(false);
-  const [editing, setEditing] = createSignal(false);
-  const [editedTweet, setEditedTweet] = createSignal("");
-  const [includeHashtag, setIncludeHashtag] = createSignal(false);
-  const [includeEmoji, setIncludeEmoji] = createSignal(false);
-  
+  // UI States
+  const [prompt, setPrompt] = createSignal("");              // Tweet prompt text input
+  const [tweet, setTweet] = createSignal("");                // Latest generated tweet
+  const [history, setHistory] = createSignal([]);            // List of all tweets generated
+  const [loading, setLoading] = createSignal(false);         // Controls loading state
+  const [editing, setEditing] = createSignal(false);         // Are we editing the tweet?
+  const [editedTweet, setEditedTweet] = createSignal("");    // Edited tweet content
+  const [includeHashtag, setIncludeHashtag] = createSignal(false);  // User wants hashtags?
+  const [includeEmoji, setIncludeEmoji] = createSignal(false);      // User wants emojis?
 
+  // Warm up the backend on first load (sends dummy request to avoid cold-start delay)
   onMount(() => {
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
+    }).catch(() => {});
+  });
 
-
-  // 🔥 Warm-up API
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
-  }).catch(() => {});
-});
-
-
- 
-
+  // Calls backend to generate tweet
   const generateTweet = async () => {
     if (!prompt()) return;
     setLoading(true);
@@ -42,11 +38,14 @@ export default function App() {
         }),
       });
       if (!response.ok) throw new Error("Failed to generate tweet");
+
       const data = await response.json();
       const tweetText = data.result;
+
+      // Update tweet + history
       setTweet(tweetText);
       setHistory([{ text: tweetText, topic: prompt(), posted: false }, ...history()]);
-      setPrompt("");
+      setPrompt(""); // Clear input
     } catch (error) {
       alert("Error generating tweet: " + error.message);
     } finally {
@@ -54,6 +53,7 @@ export default function App() {
     }
   };
 
+  // Sends the tweet to the Twitter Clone API
   const postTweet = async (index) => {
     const tweetToPost = history()[index];
     try {
@@ -66,6 +66,8 @@ export default function App() {
         body: JSON.stringify({ username: "argha", text: tweetToPost.text }),
       });
       if (!response.ok) throw new Error("Failed to post tweet");
+
+      // Mark as posted
       const updated = history().map((item, i) =>
         i === index ? { ...item, posted: true } : item
       );
@@ -78,13 +80,15 @@ export default function App() {
   return (
     <div class="min-h-screen bg-gradient-to-tr from-gray-950 to-gray-900 text-white font-sans">
       <div class="max-w-3xl mx-auto px-6 py-14">
+        
+        {/* App Header */}
         <header class="flex justify-between items-center mb-10">
           <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-transparent bg-clip-text animate-pulse">
             AI Tweet Studio 🚀
           </h1>
-        
         </header>
 
+        {/* Input Section */}
         <section class="bg-gray-900/70 backdrop-blur-md border border-indigo-500/30 rounded-2xl shadow-2xl p-6 transition-all duration-300">
           <label for="tweet-topic" class="block text-lg font-semibold mb-2 text-indigo-300">
             What should your tweet be about?
@@ -98,17 +102,29 @@ export default function App() {
             onInput={(e) => setPrompt(e.target.value)}
           />
 
+          {/* Options */}
           <div class="flex flex-wrap gap-4 mt-4">
             <label class="flex items-center gap-2 text-sm text-indigo-200">
-              <input type="checkbox" checked={includeHashtag()} onChange={(e) => setIncludeHashtag(e.target.checked)} class="rounded" />
+              <input
+                type="checkbox"
+                checked={includeHashtag()}
+                onChange={(e) => setIncludeHashtag(e.target.checked)}
+                class="rounded"
+              />
               Include hashtag (#AI)
             </label>
             <label class="flex items-center gap-2 text-sm text-indigo-200">
-              <input type="checkbox" checked={includeEmoji()} onChange={(e) => setIncludeEmoji(e.target.checked)} class="rounded" />
+              <input
+                type="checkbox"
+                checked={includeEmoji()}
+                onChange={(e) => setIncludeEmoji(e.target.checked)}
+                class="rounded"
+              />
               Include emoji (🎯)
             </label>
           </div>
 
+          {/* Generate Button */}
           <button
             class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg transition-all duration-300 disabled:opacity-50"
             onClick={generateTweet}
@@ -118,6 +134,7 @@ export default function App() {
           </button>
         </section>
 
+        {/* Generated Tweet Output */}
         {tweet() && (
           <section class="mt-12 animate-fade-in">
             <h2 class="text-xl font-semibold mb-3 text-indigo-400">Generated Tweet</h2>
@@ -133,31 +150,44 @@ export default function App() {
                 <p class="text-white text-lg">{tweet()}</p>
               )}
 
+              {/* Edit / Save Controls */}
               <div class="flex justify-end gap-4 mt-4 text-sm">
                 <button class="text-indigo-300 hover:underline" onClick={() => navigator.clipboard.writeText(tweet())}>
                   📋 Copy
                 </button>
                 {editing() ? (
                   <>
-                    <button class="text-green-400 hover:underline" onClick={() => {
-                      setTweet(editedTweet());
-                      const updated = history().map((item, i) => i === 0 ? { ...item, text: editedTweet() } : item);
-                      setHistory(updated);
-                      setEditing(false);
-                    }}>💾 Save</button>
-                    <button class="text-red-400 hover:underline" onClick={() => setEditing(false)}>❌ Cancel</button>
+                    <button
+                      class="text-green-400 hover:underline"
+                      onClick={() => {
+                        setTweet(editedTweet());
+                        const updated = history().map((item, i) =>
+                          i === 0 ? { ...item, text: editedTweet() } : item
+                        );
+                        setHistory(updated);
+                        setEditing(false);
+                      }}
+                    >
+                      💾 Save
+                    </button>
+                    <button class="text-red-400 hover:underline" onClick={() => setEditing(false)}>
+                      ❌ Cancel
+                    </button>
                   </>
                 ) : (
                   <button class="text-yellow-300 hover:underline" onClick={() => {
                     setEditedTweet(tweet());
                     setEditing(true);
-                  }}>✏️ Edit</button>
+                  }}>
+                    ✏️ Edit
+                  </button>
                 )}
               </div>
             </div>
           </section>
         )}
 
+        {/* Previous Tweets History */}
         {history().length > 0 && (
           <section class="mt-10">
             <h2 class="text-xl font-semibold mb-4 text-indigo-400">Tweet History</h2>
