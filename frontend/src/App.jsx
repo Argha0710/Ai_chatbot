@@ -1,4 +1,4 @@
-import { createSignal, onMount, createEffect } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import "./index.css";
 import "solid-js/web";
 
@@ -11,21 +11,15 @@ export default function App() {
   const [editedTweet, setEditedTweet] = createSignal("");
   const [includeHashtag, setIncludeHashtag] = createSignal(false);
   const [includeEmoji, setIncludeEmoji] = createSignal(false);
-  
 
   onMount(() => {
-
-
-  // 🔥 Warm-up API
-  fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
-  }).catch(() => {});
-});
-
-
- 
+    // Warm-up API
+    fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
+    }).catch(() => {});
+  });
 
   const generateTweet = async () => {
     if (!prompt()) return;
@@ -76,22 +70,21 @@ export default function App() {
   };
 
   return (
-    <div class="min-h-screen bg-gradient-to-tr from-gray-950 to-gray-900 text-white font-sans">
+    <div class="min-h-screen bg-gradient-to-tr from-white to-gray-100 text-gray-800 font-sans">
       <div class="max-w-3xl mx-auto px-6 py-14">
         <header class="flex justify-between items-center mb-10">
           <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-transparent bg-clip-text animate-pulse">
             AI Tweet Studio 🚀
           </h1>
-        
         </header>
 
-        <section class="bg-gray-900/70 backdrop-blur-md border border-indigo-500/30 rounded-2xl shadow-2xl p-6 transition-all duration-300">
-          <label for="tweet-topic" class="block text-lg font-semibold mb-2 text-indigo-300">
+        <section class="bg-white border border-indigo-200 rounded-2xl shadow-2xl p-6">
+          <label for="tweet-topic" class="block text-lg font-semibold mb-2 text-indigo-600">
             What should your tweet be about?
           </label>
           <textarea
             id="tweet-topic"
-            class="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            class="w-full p-3 rounded-xl bg-gray-100 border border-gray-300 text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             rows="3"
             placeholder="E.g. AI, productivity, web development..."
             value={prompt()}
@@ -99,11 +92,11 @@ export default function App() {
           />
 
           <div class="flex flex-wrap gap-4 mt-4">
-            <label class="flex items-center gap-2 text-sm text-indigo-200">
+            <label class="flex items-center gap-2 text-sm text-indigo-700">
               <input type="checkbox" checked={includeHashtag()} onChange={(e) => setIncludeHashtag(e.target.checked)} class="rounded" />
               Include hashtag (#AI)
             </label>
-            <label class="flex items-center gap-2 text-sm text-indigo-200">
+            <label class="flex items-center gap-2 text-sm text-indigo-700">
               <input type="checkbox" checked={includeEmoji()} onChange={(e) => setIncludeEmoji(e.target.checked)} class="rounded" />
               Include emoji (🎯)
             </label>
@@ -120,35 +113,35 @@ export default function App() {
 
         {tweet() && (
           <section class="mt-12 animate-fade-in">
-            <h2 class="text-xl font-semibold mb-3 text-indigo-400">Generated Tweet</h2>
-            <div class="bg-gradient-to-bl from-gray-800 via-gray-900 to-black border border-indigo-700 p-5 rounded-2xl shadow-xl">
+            <h2 class="text-xl font-semibold mb-3 text-indigo-600">Generated Tweet</h2>
+            <div class="bg-white border border-indigo-300 p-5 rounded-2xl shadow-xl">
               {editing() ? (
                 <textarea
-                  class="w-full p-3 rounded-xl bg-gray-800 text-white border border-indigo-500"
+                  class="w-full p-3 rounded-xl bg-gray-100 text-gray-800 border border-indigo-500"
                   value={editedTweet()}
                   rows={3}
                   onInput={(e) => setEditedTweet(e.target.value)}
                 />
               ) : (
-                <p class="text-white text-lg">{tweet()}</p>
+                <p class="text-gray-800 text-lg">{tweet()}</p>
               )}
 
               <div class="flex justify-end gap-4 mt-4 text-sm">
-                <button class="text-indigo-300 hover:underline" onClick={() => navigator.clipboard.writeText(tweet())}>
+                <button class="text-indigo-600 hover:underline" onClick={() => navigator.clipboard.writeText(tweet())}>
                   📋 Copy
                 </button>
                 {editing() ? (
                   <>
-                    <button class="text-green-400 hover:underline" onClick={() => {
+                    <button class="text-green-600 hover:underline" onClick={() => {
                       setTweet(editedTweet());
                       const updated = history().map((item, i) => i === 0 ? { ...item, text: editedTweet() } : item);
                       setHistory(updated);
                       setEditing(false);
                     }}>💾 Save</button>
-                    <button class="text-red-400 hover:underline" onClick={() => setEditing(false)}>❌ Cancel</button>
+                    <button class="text-red-600 hover:underline" onClick={() => setEditing(false)}>❌ Cancel</button>
                   </>
                 ) : (
-                  <button class="text-yellow-300 hover:underline" onClick={() => {
+                  <button class="text-yellow-600 hover:underline" onClick={() => {
                     setEditedTweet(tweet());
                     setEditing(true);
                   }}>✏️ Edit</button>
@@ -160,17 +153,17 @@ export default function App() {
 
         {history().length > 0 && (
           <section class="mt-10">
-            <h2 class="text-xl font-semibold mb-4 text-indigo-400">Tweet History</h2>
+            <h2 class="text-xl font-semibold mb-4 text-indigo-600">Tweet History</h2>
             <ul class="space-y-4">
               {history().map((item, index) => (
-                <li class="bg-gray-800/90 border border-gray-700 p-4 rounded-2xl shadow-lg">
-                  <p class="text-white">{item.text}</p>
-                  <div class="flex justify-between text-sm text-indigo-300 mt-2">
+                <li class="bg-white border border-gray-200 p-4 rounded-2xl shadow-md">
+                  <p class="text-gray-800">{item.text}</p>
+                  <div class="flex justify-between text-sm text-indigo-500 mt-2">
                     <span>Topic: {item.topic}</span>
                     {item.posted ? (
-                      <span class="text-green-400">✅ Posted</span>
+                      <span class="text-green-500">✅ Posted</span>
                     ) : (
-                      <button class="text-indigo-400 hover:underline" onClick={() => postTweet(index)}>
+                      <button class="hover:underline" onClick={() => postTweet(index)}>
                         🔗 Post to Twitter
                       </button>
                     )}
