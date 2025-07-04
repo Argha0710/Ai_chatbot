@@ -1,4 +1,4 @@
-# Node.js / Frontend
+# ─── Frontend (Vite + SolidJS) ─────────────────────────
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
@@ -6,41 +6,50 @@ frontend/.output/
 frontend/.env
 frontend/.env*.local
 
-# Python / Backend
-backend/node_modules/
+# ─── Backend (FastAPI + Python) ────────────────────────
 backend/__pycache__/
+backend/*.pyc
 backend/.env
 backend/.env*.local
+backend/venv/
+backend/env/
+backend/.mypy_cache/
+backend/.pytest_cache/
 
-# General
+# ─── MinIO Local Setup ────────────────────────────────
+minio
+
+# ─── Global Env Files ─────────────────────────────────
 .env
 .env*.local
+
+# ─── Logs and Lockfiles ───────────────────────────────
 *.log
 *.lock
-.DS_Store
-Thumbs.db
 
-# IDEs and editors
-/.idea
+# ─── IDEs / Editors ───────────────────────────────────
 .vscode/
-*.sublime-workspace
+.idea/
 *.sublime-project
+*.sublime-workspace
 *.code-workspace
+*.launch
 .project
 .classpath
-*.launch
 .settings/
 
-# System Files
+# ─── System Files ─────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Vercel/Netlify/Deploy
+# ─── Deploy & Build Tools ─────────────────────────────
 .vercel/
 .netlify/
 .output/
 .wrangler/
 app.config.timestamp_*.js
 
-# Misc
-dist
+# ─── Misc ─────────────────────────────────────────────
+dist/
+build/
+coverage/

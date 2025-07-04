@@ -1,35 +1,22 @@
-import { createSignal, onMount } from "solid-js"; // SolidJS hooks for reactivity
-import "./index.css"; // TailwindCSS + custom styles
-import "solid-js/web"; // Web-specific bindings
+import { createSignal, onMount } from "solid-js";
+import "./index.css";
+import "solid-js/web";
 
-// Main component
 export default function App() {
-  // 🌟 State variables (SolidJS reactive signals)
-  const [prompt, setPrompt] = createSignal("");              // user input topic
-  const [tweet, setTweet] = createSignal("");                // generated tweet
-  const [history, setHistory] = createSignal([]);            // tweet history
-  const [loading, setLoading] = createSignal(false);         // loading indicator
-  const [editing, setEditing] = createSignal(false);         // editing state toggle
-  const [editedTweet, setEditedTweet] = createSignal("");    // editable tweet content
-  const [includeHashtag, setIncludeHashtag] = createSignal(false); // toggle for hashtag
-  const [includeEmoji, setIncludeEmoji] = createSignal(false);     // toggle for emoji
+  const [prompt, setPrompt] = createSignal("");
+  const [history, setHistory] = createSignal([]);
+  const [loading, setLoading] = createSignal(false);
+  const [includeHashtag, setIncludeHashtag] = createSignal(false);
+  const [includeEmoji, setIncludeEmoji] = createSignal(false);
+  const [generateImage, setGenerateImage] = createSignal(false);
+  const [temperature, setTemperature] = createSignal("balanced");
+  const [editingText, setEditingText] = createSignal("");
 
-  // 🚀 Run once when the app loads
   onMount(() => {
-    // 🌙 Enable dark mode if system prefers it
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     document.documentElement.classList.toggle("dark", prefersDark);
-
-    // 🔥 Warm-up the backend by making a dummy request
-    // This reduces latency on the first real request
-    fetch(`${import.meta.env.VITE_BACKEND_URL}/generate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt: "Hello world", hashtag: false, emoji: false }),
-    }).catch(() => {}); // Ignore error
   });
 
-  // ✨ Generate tweet from backend
   const generateTweet = async () => {
     if (!prompt()) return;
     setLoading(true);
@@ -41,162 +28,207 @@ export default function App() {
           prompt: prompt(),
           hashtag: includeHashtag(),
           emoji: includeEmoji(),
+          temperature: temperature()
         }),
       });
 
-      if (!response.ok) throw new Error("Failed to generate tweet");
-
+      if (!response.ok) throw new Error("Tweet generation failed");
       const data = await response.json();
       const tweetText = data.result;
 
-      // Save tweet to state and history
-      setTweet(tweetText);
-      setHistory([{ text: tweetText, topic: prompt(), posted: false }, ...history()]);
-      setPrompt(""); // clear input field
-    } catch (error) {
-      alert("Error generating tweet: " + error.message);
+      let imageUrl = "";
+      if (generateImage()) {
+        const imageRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate_image`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          // body: JSON.stringify({ prompt: prompt() }),
+          body: JSON.stringify({ prompt: tweetText }),
+        });
+        if (imageRes.ok) {
+          const imgData = await imageRes.json();
+          imageUrl = imgData.image_url;
+        }
+      }
+
+      setHistory([
+        {
+          prompt: prompt(),
+          text: tweetText,
+          image: imageUrl,
+          posted: false,
+          editing: false,
+        },
+        ...history(),
+      ]);
+      setPrompt("");
+    } catch (err) {
+      alert("Error: " + err.message);
     } finally {
-      setLoading(false); // stop loading spinner
+      setLoading(false);
     }
   };
 
-  // 📨 Post tweet to Twitter Clone backend
-  const postTweet = async (index) => {
-    const tweetToPost = history()[index];
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/post_tweet`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "api-key": import.meta.env.VITE_TWITTER_CLONE_API_KEY,
-        },
-        body: JSON.stringify({ username: "argha", text: tweetToPost.text }),
-      });
+  const regenerateImage = async (index) => {
+    const item = history()[index];
+    const imageRes = await fetch(`${import.meta.env.VITE_BACKEND_URL}/generate_image`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: item.prompt }),
+    });
 
-      if (!response.ok) throw new Error("Failed to post tweet");
-
-      // Mark tweet as posted in history list
-      const updated = history().map((item, i) =>
-        i === index ? { ...item, posted: true } : item
+    if (imageRes.ok) {
+      const imgData = await imageRes.json();
+      const updated = history().map((h, i) =>
+        i === index ? { ...h, image: imgData.image_url } : h
       );
       setHistory(updated);
-    } catch (error) {
-      alert("Tweet post failed: " + error.message);
     }
   };
 
-  // 🖼️ UI Structure
+  const postTweet = async (index) => {
+    const tweet = history()[index];
+    const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/post_tweet`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "api-key": import.meta.env.VITE_TWITTER_CLONE_API_KEY,
+      },
+      body: JSON.stringify({
+        username: "argha",
+        text: tweet.text,
+        image: tweet.image || null,
+      }),
+    });
+
+    if (response.ok) {
+      const updated = history().map((h, i) =>
+        i === index ? { ...h, posted: true } : h
+      );
+      setHistory(updated);
+    } else {
+      alert("Tweet failed");
+    }
+  };
+
+  const updateEditedTweet = (index, newText) => {
+    const updated = history().map((h, i) =>
+      i === index ? { ...h, text: newText, editing: false, posted: false } : h
+    );
+    setHistory(updated);
+  };
+
   return (
     <div class="min-h-screen bg-gradient-to-tr from-gray-950 to-gray-900 text-white font-sans">
-      <div class="max-w-3xl mx-auto px-6 py-14">
-        {/* 🧠 App Title */}
-        <header class="flex justify-between items-center mb-10">
-          <h1 class="text-4xl font-bold bg-gradient-to-r from-indigo-500 to-fuchsia-500 text-transparent bg-clip-text animate-pulse">
-            AI Tweet Studio 🚀
-          </h1>
-        </header>
+      <div class="max-w-3xl mx-auto px-4 py-10">
+        <h1 class="text-4xl font-bold text-center mb-10 bg-gradient-to-r from-indigo-500 to-pink-500 bg-clip-text text-transparent">
+          AI Tweet Studio 🚀
+        </h1>
 
-        {/* 📝 Prompt Input Section */}
-        <section class="bg-gray-900/70 backdrop-blur-md border border-indigo-500/30 rounded-2xl shadow-2xl p-6">
-          <label for="tweet-topic" class="block text-lg font-semibold mb-2 text-indigo-300">
-            What should your tweet be about?
-          </label>
+        <div class="bg-gray-900/80 p-6 rounded-2xl shadow-xl border border-indigo-500/30 mb-8">
           <textarea
-            id="tweet-topic"
             class="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             rows="3"
-            placeholder="E.g. AI, productivity, web development..."
+            placeholder="Write a topic..."
             value={prompt()}
             onInput={(e) => setPrompt(e.target.value)}
           />
-
-          {/* ⚙️ Options: Include hashtag and emoji */}
-          <div class="flex flex-wrap gap-4 mt-4">
-            <label class="flex items-center gap-2 text-sm text-indigo-200">
+          <div class="flex flex-wrap gap-4 mt-4 text-sm text-indigo-200">
+            <label class="flex items-center gap-2">
               <input type="checkbox" checked={includeHashtag()} onChange={(e) => setIncludeHashtag(e.target.checked)} />
-              Include hashtag (#AI)
+              Hashtags
             </label>
-            <label class="flex items-center gap-2 text-sm text-indigo-200">
+            <label class="flex items-center gap-2">
               <input type="checkbox" checked={includeEmoji()} onChange={(e) => setIncludeEmoji(e.target.checked)} />
-              Include emoji (🎯)
+              Emojis
+            </label>
+            <label class="flex items-center gap-2">
+              <input type="checkbox" checked={generateImage()} onChange={(e) => setGenerateImage(e.target.checked)} />
+              Generate Image
+            </label>
+            <label class="flex items-center gap-2">
+              Temperature:
+              <select
+                value={temperature()}
+                onInput={(e) => setTemperature(e.currentTarget.value)}
+                class="bg-gray-800 border border-gray-600 p-1 rounded"
+              >
+                <option value="precise">Precise</option>
+                <option value="balanced">Balanced</option>
+                <option value="creative">Creative</option>
+                <option value="wild">Wild</option>
+              </select>
             </label>
           </div>
-
-          {/* ✨ Generate Tweet Button */}
           <button
-            class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl shadow-lg disabled:opacity-50"
             onClick={generateTweet}
             disabled={loading()}
+            class="mt-6 w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl shadow-lg disabled:opacity-50"
           >
             {loading() ? "✨ Generating..." : "🚀 Generate Tweet"}
           </button>
-        </section>
+        </div>
 
-        {/* 📢 Generated Tweet Section */}
-        {tweet() && (
-          <section class="mt-12 animate-fade-in">
-            <h2 class="text-xl font-semibold mb-3 text-indigo-400">Generated Tweet</h2>
-            <div class="bg-gradient-to-bl from-gray-800 via-gray-900 to-black border border-indigo-700 p-5 rounded-2xl shadow-xl">
-              {editing() ? (
-                <textarea
-                  class="w-full p-3 rounded-xl bg-gray-800 text-white border border-indigo-500"
-                  value={editedTweet()}
-                  rows={3}
-                  onInput={(e) => setEditedTweet(e.target.value)}
-                />
-              ) : (
-                <p class="text-white text-lg">{tweet()}</p>
-              )}
-
-              {/* 🛠️ Tweet Controls */}
-              <div class="flex justify-end gap-4 mt-4 text-sm">
-                <button onClick={() => navigator.clipboard.writeText(tweet())} class="text-indigo-300 hover:underline">📋 Copy</button>
-                {editing() ? (
-                  <>
-                    <button class="text-green-400 hover:underline" onClick={() => {
-                      setTweet(editedTweet());
-                      const updated = history().map((item, i) =>
-                        i === 0 ? { ...item, text: editedTweet() } : item
-                      );
-                      setHistory(updated);
-                      setEditing(false);
-                    }}>💾 Save</button>
-                    <button class="text-red-400 hover:underline" onClick={() => setEditing(false)}>❌ Cancel</button>
-                  </>
-                ) : (
-                  <button class="text-yellow-300 hover:underline" onClick={() => {
-                    setEditedTweet(tweet());
-                    setEditing(true);
-                  }}>✏️ Edit</button>
-                )}
+        <div class="space-y-8">
+          {history().map((item, index) => (
+            <div class="flex flex-col gap-4 w-full" key={index}>
+              <div class="flex justify-start">
+                <div class="bg-gray-800 p-4 rounded-xl w-full max-w-[90%]">
+                  <p class="text-sm text-indigo-300">You:</p>
+                  <p>{item.prompt}</p>
+                </div>
               </div>
-            </div>
-          </section>
-        )}
 
-        {/* 🕓 Tweet History Section */}
-        {history().length > 0 && (
-          <section class="mt-10">
-            <h2 class="text-xl font-semibold mb-4 text-indigo-400">Tweet History</h2>
-            <ul class="space-y-4">
-              {history().map((item, index) => (
-                <li class="bg-gray-800/90 border border-gray-700 p-4 rounded-2xl shadow-lg">
-                  <p class="text-white">{item.text}</p>
-                  <div class="flex justify-between text-sm text-indigo-300 mt-2">
-                    <span>Topic: {item.topic}</span>
+              <div class="flex justify-end">
+                <div class="bg-gray-900 border border-indigo-500/30 p-4 rounded-xl w-full max-w-[90%]">
+                  <p class="text-sm text-pink-400">AI:</p>
+                  {item.editing ? (
+                    <>
+                      <textarea
+                        ref={(el) => el?.focus()}
+                        value={editingText()}
+                        rows={3}
+                        onInput={(e) => setEditingText(e.currentTarget.value)}
+                        class="w-full p-2 rounded bg-gray-800 text-white border border-indigo-400 mt-1"
+                      />
+                      <div class="flex justify-end gap-4 mt-2 text-sm">
+                        <button class="text-green-400 hover:underline" onClick={() => updateEditedTweet(index, editingText())}>💾 Save</button>
+                        <button class="text-red-400 hover:underline" onClick={() => {
+                          const updated = [...history()];
+                          updated[index].editing = false;
+                          setHistory(updated);
+                        }}>❌ Cancel</button>
+                      </div>
+                    </>
+                  ) : (
+                    <p class="text-white mt-1">{item.text}</p>
+                  )}
+
+                  {item.image && (
+                    <div class="mt-3">
+                      <img src={item.image} alt="AI Visual" class="rounded-xl max-h-64" />
+                      <button class="text-indigo-300 text-sm hover:underline mt-1" onClick={() => regenerateImage(index)}>🔁 Regenerate Image</button>
+                    </div>
+                  )}
+
+                  <div class="flex justify-end gap-4 mt-3 text-sm">
+                    <button onClick={() => navigator.clipboard.writeText(item.text)} class="text-indigo-300 hover:underline">📋 Copy</button>
+                    <button class="text-yellow-400 hover:underline" onClick={() => {
+                      const updated = [...history()];
+                      updated[index].editing = true;
+                      setEditingText(item.text);
+                      setHistory(updated);
+                    }}>✏️ Edit</button>
                     {item.posted ? (
                       <span class="text-green-400">✅ Posted</span>
                     ) : (
-                      <button class="text-indigo-400 hover:underline" onClick={() => postTweet(index)}>
-                        🔗 Post to Twitter
-                      </button>
+                      <button onClick={() => postTweet(index)} class="text-indigo-400 hover:underline">📤 Post</button>
                     )}
                   </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
