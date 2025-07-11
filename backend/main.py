@@ -20,7 +20,9 @@ app = FastAPI()
 # 🔓 CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # ⚠️ Use specific origin in production
+    allow_origins=["https://ai-chatbot-vert-six-94.vercel.app",  # Replace this with your actual frontend domain
+    "http://localhost:3000",             # For local testing
+    "http://127.0.0.1:3000"],  # ⚠️ Use specific origin in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -47,8 +49,14 @@ minio_client = Minio(
 )
 
 # Ensure bucket exists
-if not minio_client.bucket_exists(MINIO_BUCKET):
-    minio_client.make_bucket(MINIO_BUCKET)
+from minio.error import S3Error
+
+try:
+    if not minio_client.bucket_exists(MINIO_BUCKET):
+        minio_client.make_bucket(MINIO_BUCKET)
+except S3Error as e:
+    print("MinIO Error:", e)
+
 
 # 📦 Data models
 class Prompt(BaseModel):

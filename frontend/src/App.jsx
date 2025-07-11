@@ -31,7 +31,7 @@ export default function App() {
           temperature: temperature()
         }),
       });
-
+    
       if (!response.ok) throw new Error("Tweet generation failed");
       const data = await response.json();
       const tweetText = data.result;

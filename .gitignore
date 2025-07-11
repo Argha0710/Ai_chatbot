@@ -9,15 +9,22 @@ frontend/.env*.local
 # ─── Backend (FastAPI + Python) ────────────────────────
 backend/__pycache__/
 backend/*.pyc
+backend/*.pyo
 backend/.env
 backend/.env*.local
 backend/venv/
 backend/env/
 backend/.mypy_cache/
 backend/.pytest_cache/
+backend/.coverage
+backend/instance/
+backend/.DS_Store
 
 # ─── MinIO Local Setup ────────────────────────────────
-minio
+minio/
+minio-data/
+*.minio/
+*.mc/
 
 # ─── Global Env Files ─────────────────────────────────
 .env
@@ -26,6 +33,9 @@ minio
 # ─── Logs and Lockfiles ───────────────────────────────
 *.log
 *.lock
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
 # ─── IDEs / Editors ───────────────────────────────────
 .vscode/
@@ -49,7 +59,16 @@ Thumbs.db
 .wrangler/
 app.config.timestamp_*.js
 
+# ─── Docker ───────────────────────────────────────────
+docker-compose.override.yml
+*.pid
+*.seed
+
 # ─── Misc ─────────────────────────────────────────────
 dist/
 build/
 coverage/
+*.bak
+*.tmp
+*.swp
+*.old
