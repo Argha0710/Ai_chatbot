@@ -49,13 +49,15 @@ minio_client = Minio(
     secure=MINIO_SECURE
 )
 
-# Ensure bucket exists
+# Check bucket at runtime only when needed
+def ensure_bucket():
+    try:
+        if not minio_client.bucket_exists(MINIO_BUCKET):
+            minio_client.make_bucket(MINIO_BUCKET)
+    except S3Error as e:
+        print("❌ MinIO Error:", e)
+        raise HTTPException(status_code=500, detail="MinIO bucket check failed")
 
-try:
-    if not minio_client.bucket_exists(MINIO_BUCKET):
-        minio_client.make_bucket(MINIO_BUCKET)
-except S3Error as e:
-    print("MinIO Error:", e)
 
 
 # 📦 Data models
@@ -107,6 +109,7 @@ def generate_tweet(data: Prompt):
 @app.post("/generate_image")
 def generate_image(data: ImagePrompt):
     try:
+        ensure_bucket()
         poll_token = os.getenv("POLLINATIONS_TOKEN")
         if not poll_token:
             raise Exception("Missing POLLINATIONS_TOKEN")
@@ -166,5 +169,4 @@ def post_tweet(tweet: Tweet, api_key: str = Header(...)):
         raise HTTPException(status_code=500, detail=str(e))
 if __name__ == "__main__":
     import uvicorn
-    port = int(os.environ.get("PORT", 10000))  # Use PORT env from Render
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
