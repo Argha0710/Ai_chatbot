@@ -164,7 +164,7 @@ def post_tweet(tweet: Tweet, api_key: str = Header(...)):
     except Exception as e:
         print("🚨 Post Tweet Error:", e)
         raise HTTPException(status_code=500, detail=str(e))
-if __name__ == "__main__":
-    import uvicorn
-    port = int(os.environ.get("PORT", 8000))  # Use PORT env from Render
-    uvicorn.run("main:app", host="0.0.0.0", port=port)
+# if __name__ == "__main__":
+#     import uvicorn
+#     port = int(os.environ.get("PORT", 8000))  # Use PORT env from Render
+#     uvicorn.run("main:app", host="0.0.0.0", port=port)
