@@ -21,7 +21,7 @@ app = FastAPI()
 # 🔓 CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ai-chatbot-vert-six-94.vercel.app",  # Replace this with your actual frontend domain
+    allow_origins=["https://ai-chatbot-git-main-argha-chakrabortys-projects.vercel.app",  # Replace this with your actual frontend domain
     "http://localhost:3000",             # For local testing
     "http://127.0.0.1:3000"],  # ⚠️ Use specific origin in production
     allow_credentials=True,
