@@ -3,13 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
 from dotenv import load_dotenv
+import random
 import os
 import requests
 from io import BytesIO
 from uuid import uuid4
 from minio import Minio
 from urllib.parse import quote
-import random
+from minio.error import S3Error
 
 # 🔐 Load environment variables
 load_dotenv()
@@ -49,7 +50,6 @@ minio_client = Minio(
 )
 
 # Ensure bucket exists
-from minio.error import S3Error
 
 try:
     if not minio_client.bucket_exists(MINIO_BUCKET):
@@ -164,7 +164,7 @@ def post_tweet(tweet: Tweet, api_key: str = Header(...)):
     except Exception as e:
         print("🚨 Post Tweet Error:", e)
         raise HTTPException(status_code=500, detail=str(e))
-# if __name__ == "__main__":
-#     import uvicorn
-#     port = int(os.environ.get("PORT", 8000))  # Use PORT env from Render
-#     uvicorn.run("main:app", host="0.0.0.0", port=port)
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 10000))  # Use PORT env from Render
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
