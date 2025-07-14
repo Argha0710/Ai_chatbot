@@ -105,39 +105,52 @@ def generate_tweet(data: Prompt):
         print("🚨 Tweet Generation Error:", e)
         raise HTTPException(status_code=500, detail="Error generating tweet")
 
-# 🖼️ Image generation and MinIO upload
+# # 🖼️ Image generation and MinIO upload
+# @app.post("/generate_image")
+# def generate_image(data: ImagePrompt):
+#     try:
+#         ensure_bucket()
+#         poll_token = os.getenv("POLLINATIONS_TOKEN")
+#         if not poll_token:
+#             raise Exception("Missing POLLINATIONS_TOKEN")
+
+#         prompt_encoded = quote(data.prompt)
+#         seed = random.randint(1, 999999)
+#         url = f"https://image.pollinations.ai/prompt/{prompt_encoded}?model=flux&width=1024&height=1024&seed={seed}&nologo=true"
+
+#         response = requests.get(url, headers={"Authorization": f"Bearer {poll_token}"})
+#         if response.status_code != 200:
+#             raise Exception(f"Pollinations error: {response.status_code} - {response.text}")
+
+#         image_data = BytesIO(response.content)
+#         image_name = f"{uuid4().hex}.png"
+
+#         minio_client.put_object(
+#             bucket_name=MINIO_BUCKET,
+#             object_name=image_name,
+#             data=image_data,
+#             length=image_data.getbuffer().nbytes,
+#             content_type="image/png"
+#         )
+
+#         public_url = minio_client.presigned_get_object(MINIO_BUCKET, image_name)
+#         return {"image_url": public_url}
+
+#     except Exception as e:
+#         print("🚨 Image Generation Error:", e)
+#         raise HTTPException(status_code=500, detail="Image generation failed")
 @app.post("/generate_image")
 def generate_image(data: ImagePrompt):
     try:
-        ensure_bucket()
-        poll_token = os.getenv("POLLINATIONS_TOKEN")
-        if not poll_token:
-            raise Exception("Missing POLLINATIONS_TOKEN")
-
         prompt_encoded = quote(data.prompt)
         seed = random.randint(1, 999999)
         url = f"https://image.pollinations.ai/prompt/{prompt_encoded}?model=flux&width=1024&height=1024&seed={seed}&nologo=true"
-
-        response = requests.get(url, headers={"Authorization": f"Bearer {poll_token}"})
-        if response.status_code != 200:
-            raise Exception(f"Pollinations error: {response.status_code} - {response.text}")
-
-        image_data = BytesIO(response.content)
-        image_name = f"{uuid4().hex}.png"
-
-        minio_client.put_object(
-            bucket_name=MINIO_BUCKET,
-            object_name=image_name,
-            data=image_data,
-            length=image_data.getbuffer().nbytes,
-            content_type="image/png"
-        )
-
-        public_url = minio_client.presigned_get_object(MINIO_BUCKET, image_name)
-        return {"image_url": public_url}
+        
+        # Just return the image URL directly — skip download + MinIO
+        return {"image_url": url}
 
     except Exception as e:
-        print("🚨 Image Generation Error:", e)
+        print("🚨 Simplified Image Generation Error:", e)
         raise HTTPException(status_code=500, detail="Image generation failed")
 
 # 📤 Post tweet to Twitter Clone
